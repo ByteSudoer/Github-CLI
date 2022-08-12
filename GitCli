@@ -16,7 +16,7 @@ function createRepo()
   echo "##########################################################"
   read -p "Enter Repository name : " name
   read -p "private or public (default:private) : " status
-  read -r "Enter Repository description (Press Enter to leave Empty) : " description
+  read -p "Enter Repository description (Press Enter to leave Empty) : " description
   read -p "Do you want to clone the Repository in your current directory (y/n) : " clone
 
   if [ -z "$name" ];then
