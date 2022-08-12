@@ -1,0 +1,121 @@
+#!/usr/bin/env bash 
+
+
+function usage()
+{
+  echo 
+  echo "Github Manager with Github-CLI"
+  echo "Command Format : GitRepo <command> <option(s)>"
+  echo "GitRepo: [-h|--help] [-c|--create] [-l|--list] [-i|--info] [-d|--delete] [-f|--fuzzy] [-s|--search]"
+  echo
+}
+function createRepo()
+{
+  echo "##########################################################"
+  echo "Github Repositories creator "
+  echo "##########################################################"
+  read -p "Enter Repository name : " name
+  read -p "private or public (default:private) : " status
+  read -r "Enter Repository description (Press Enter to leave Empty) : " description
+  read -p "Do you want to clone the Repository in your current directory (y/n) : " clone
+
+  if [ -z "$name" ];then
+    echo "Must Provide Repository name!"
+  else
+    if [ -z "$status" ] || [ "$status" == "private" ];then
+      if [ "$clone" == "y" ];then
+        gh repo create "$name" --private --clone -d "$description"
+      elif [ "$clone" == "n" ];then
+        gh repo create "$name" --private  -d "$description"
+      fi
+        
+    elif [ "$status" == "public" ];then
+      gh repo create "$name" "--${status}" -d "$description"
+    else
+      echo "Invalid Input"
+    fi
+  fi
+
+}
+function deleteRepo()
+{
+  listRepo
+  read -p "Enter Repository Name to delete : " name
+  gh repo delete "$name"
+}
+function fuzzyDiff()
+{
+  git log --oneline "$@" |
+  fzf --reverse                                                                  \
+      --ansi                                                                     \
+      --prompt='[Commit] > '                                                     \
+      --bind="ctrl-u:preview-page-up"                                            \
+      --bind="ctrl-d:preview-page-down"                                          \
+      --bind="ctrl-k:preview-up"                                                 \
+      --bind="ctrl-j:preview-down"                                               \
+      --preview="echo {} | cut -d ' ' -f 1 | xargs -I % sh -c 'git show %'"      \
+      --preview-window='down:75%'
+}
+function help()
+{
+  echo "##########################################################"
+  echo "Available Options For Script."
+  echo
+  echo "    -i --info       Display Infos about Repositories"
+  echo "    -h --help       Display Description And Options For this Script"
+  echo "    -l --list       List Repositories Linked to account"
+  echo "    -c --create     Create Repository and Clone it to current path"
+  echo "    -f --fuzzy      Fuzzy search for diff in current repo"
+  echo "    -d --delete     List Repositories Linked to account"
+  echo
+}
+function listRepo()
+{
+  echo "#################################"
+  gh repo list
+  echo "#################################"
+}
+function searchRepo()
+{
+  read -p "Enter Repository name to search :" name
+  gh search repos "$name"
+}
+function statusInfo()
+{
+  echo "#################################"
+  gh status
+  echo "#################################"
+
+}
+
+if [ "$#" -eq 0 ];then
+  usage
+  exit 1
+else
+  case $1 in
+    -c|--create)
+      createRepo
+      ;;
+    -d|--delete)
+      deleteRepo
+      ;;
+    -h|--help)
+      help
+      ;;
+    -i|--info)
+      statusInfo
+      ;;
+    -f|--fuzzy)
+      fuzzyDiff
+      ;;
+    -l|--list)
+      listRepo
+      ;;
+    -s|--search)
+      searchRepo
+      ;;
+    *)
+      usage
+      ;;
+  esac
+fi
