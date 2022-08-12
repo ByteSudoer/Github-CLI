@@ -67,6 +67,7 @@ function help()
   echo "    -c --create     Create Repository and Clone it to current path"
   echo "    -f --fuzzy      Fuzzy search for diff in current repo"
   echo "    -d --delete     List Repositories Linked to account"
+  echo "    -s --search     Search and Output Informations about a Repository"
   echo
 }
 function listRepo()
