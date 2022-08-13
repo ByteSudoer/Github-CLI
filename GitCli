@@ -1,34 +1,37 @@
 #!/usr/bin/env bash 
 
 
-function usage()
+usage()
 {
-  echo 
-  echo "Github Manager with Github-CLI"
-  echo "Command Format : GitRepo <command> <option(s)>"
-  echo "GitRepo: [-h|--help] [-c|--create] [-l|--list] [-i|--info] [-d|--delete] [-f|--fuzzy] [-s|--search]"
-  echo
+cat <<- EOF
+    Github Manager with Github-CLI
+    Command Format : GitRepo <command> <option(s)>
+    GitRepo: [-h|--help] [-c|--create] [-l|--list] [-i|--info] [-d|--delete] [-f|--fuzzy] [-s|--search]
+EOF
 }
-function createRepo()
+
+createRepo()
 {
   echo "##########################################################"
   echo "Github Repositories creator "
   echo "##########################################################"
-  read -p "Enter Repository name : " name
-  read -p "private or public (default:private) : " status
-  read -p "Enter Repository description (Press Enter to leave Empty) : " description
-  read -p "Do you want to clone the Repository in your current directory (y/n) : " clone
+  read -r "Enter Repository name : " name
+  read -r "private or public (default:private) : " status
+  read -r "Enter Repository description (Press Enter to leave Empty) : " description
+  read -r "Do you want to clone the Repository in your current directory (y/n) : " clone
 
   if [ -z "$name" ];then
     echo "Must Provide Repository name!"
   else
     if [ -z "$status" ] || [ "$status" == "private" ];then
-      if [ "$clone" == "y" ];then
-        gh repo create "$name" --private --clone -d "$description"
-      elif [ "$clone" == "n" ];then
-        gh repo create "$name" --private  -d "$description"
-      fi
-        
+      case $clone in
+        ([yY]|[yY]|[eE]|[sS])
+          gh repo create "$name" --private --clone -d "$description"
+          ;;
+        ([nN]|[nN]|[oO])
+          gh repo create "$name" --private  -d "$description"
+          ;;
+      esac
     elif [ "$status" == "public" ];then
       gh repo create "$name" "--${status}" -d "$description"
     else
@@ -37,51 +40,54 @@ function createRepo()
   fi
 
 }
-function deleteRepo()
+deleteRepo()
 {
   listRepo
-  read -p "Enter Repository Name to delete : " name
+  read -r "Enter Repository Name to delete : " name
   gh repo delete "$name"
 }
-function fuzzyDiff()
+fuzzyDiff()
 {
-  git log --oneline "$@" |
-  fzf --reverse                                                                  \
-      --ansi                                                                     \
-      --prompt='[Commit] > '                                                     \
-      --bind="ctrl-u:preview-page-up"                                            \
-      --bind="ctrl-d:preview-page-down"                                          \
-      --bind="ctrl-k:preview-up"                                                 \
-      --bind="ctrl-j:preview-down"                                               \
-      --preview="echo {} | cut -d ' ' -f 1 | xargs -I % sh -c 'git show %'"      \
-      --preview-window='down:75%'
+  fzf_options=( 
+    --reverse                                                                  
+    --ansi                                                                     
+    --prompt='[Commit] > '                                                     
+    --bind="ctrl-u:preview-page-up"                                            
+    --bind="ctrl-d:preview-page-down"                                          
+    --bind="ctrl-k:preview-up"                                                 
+    --bind="ctrl-j:preview-down"                                               
+    --preview="echo {} | cut -d ' ' -f 1 | xargs -I % sh -c 'git show %'"      
+    --preview-window='down:75%'
+  )
+  git log --oneline "$@" | fzf "${fzf_options[@]}"
 }
-function help()
+help_message()
 {
-  echo "##########################################################"
-  echo "Available Options For Script."
-  echo
-  echo "    -i --info       Display Infos about Repositories"
-  echo "    -h --help       Display Description And Options For this Script"
-  echo "    -l --list       List Repositories Linked to account"
-  echo "    -c --create     Create Repository and Clone it to current path"
-  echo "    -f --fuzzy      Fuzzy search for diff in current repo"
-  echo "    -d --delete     List Repositories Linked to account"
-  echo "    -s --search     Search and Output Informations about a Repository"
-  echo
+cat << EOF
+  ##########################################################
+  Available Options For Script.
+      -i --info       Display Infos about Repositories
+      -h --help       Display Description And Options For this Script
+      -l --list       List Repositories Linked to account
+      -c --create     Create Repository and Clone it to current path
+      -f --fuzzy      Fuzzy search for diff in current repo
+      -d --delete     List Repositories Linked to account
+      -s --search     Search and Output Informations about a Repository
+  ##########################################################
+EOF
 }
-function listRepo()
+listRepo()
 {
   echo "#################################"
   gh repo list
   echo "#################################"
 }
-function searchRepo()
+ searchRepo()
 {
-  read -p "Enter Repository name to search :" name
+  read -r "Enter Repository name to search :" name
   gh search repos "$name"
 }
-function statusInfo()
+statusInfo()
 {
   echo "#################################"
   gh status
@@ -101,7 +107,7 @@ else
       deleteRepo
       ;;
     -h|--help)
-      help
+      help_message
       ;;
     -i|--info)
       statusInfo
