@@ -37,4 +37,17 @@ ln -sf <your_current_dir>/GitCli $HOME/.local/bin
 ```
 > $HOME/.local/bin should be created and added to your PATH by editing your .bashrc (instead of adding it to your /usr/bin as root)
 
+#### Available Options
+  ```bash
+    ##########################################################
+    Available Options For Script.
+      -i --info       Display Infos about Repositories
+      -h --help       Display Description And Options For this Script
+      -l --list       List Repositories Linked to account
+      -c --create     Create Repository and Clone it to current path
+      -f --fuzzy      Fuzzy search for diff in current repo
+      -d --delete     List Repositories Linked to account
+      -s --search     Search and Output Informations about a Repository
+    ##########################################################
+```
 Now you can start using it in your shell 👍
