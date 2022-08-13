@@ -15,10 +15,10 @@ createRepo()
   echo "##########################################################"
   echo "Github Repositories creator "
   echo "##########################################################"
-  read -r "Enter Repository name : " name
-  read -r "private or public (default:private) : " status
-  read -r "Enter Repository description (Press Enter to leave Empty) : " description
-  read -r "Do you want to clone the Repository in your current directory (y/n) : " clone
+  read -rp "Enter Repository name : " name
+  read -rp "private or public (default:private) : " status
+  read -rp "Enter Repository description (Press Enter to leave Empty) : " description
+  read -rp "Do you want to clone the Repository in your current directory (y/n) : " clone
 
   if [ -z "$name" ];then
     echo "Must Provide Repository name!"
